@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Browse NGOs — Daan{% endblock %}
+{% block extra_css %}
+<style>
+.page-hero { background: var(--earth); color: white; padding: 5rem 2rem 4rem; text-align: center; }
+.page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem,5vw,4rem); font-weight: 700; margin-bottom: 1rem; }
+.page-hero p { color: rgba(255,255,255,0.7); max-width: 500px; margin: 0 auto; line-height: 1.7; }
+.filter-bar { background: white; border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; position: sticky; top: 68px; z-index: 100; }
+.filter-inner { max-width: 1280px; margin: 0 auto; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.search-wrap { position: relative; flex: 1; min-width: 240px; }
+.search-wrap input { width: 100%; padding: 0.7rem 1rem 0.7rem 2.75rem; border: 1.5px solid var(--border); border-radius: 50px; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+.search-wrap input:focus { border-color: var(--sage); }
+.search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none; }
+.cat-filter { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.cat-btn { padding: 0.45rem 1rem; border: 1.5px solid var(--border); border-radius: 50px; font-size: 0.82rem; cursor: pointer; background: white; transition: all 0.2s; text-decoration: none; color: var(--text); }
+.cat-btn:hover, .cat-btn.active { background: var(--earth); color: white; border-color: var(--earth); }
+.ngo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 3rem 2rem; max-width: 1280px; margin: 0 auto; }
+.ngo-card-inner { padding: 1.75rem; }
+.ngo-avatar-lg { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; color: white; margin-bottom: 1.25rem; }
+.ngo-card-inner h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--earth); margin-bottom: 0.5rem; }
+.ngo-card-inner p { font-size: 0.88rem; color: var(--text-light); line-height: 1.65; margin-bottom: 1.25rem; }
+.ngo-card-stats { display: flex; gap: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); margin-bottom: 1.25rem; }
+.ngo-stat .v { font-weight: 700; font-size: 1.05rem; color: var(--earth); }
+.ngo-stat .l { font-size: 0.75rem; color: var(--text-light); }
+.empty { text-align: center; padding: 6rem 2rem; color: var(--text-light); }
+.empty .emoji { font-size: 4rem; margin-bottom: 1rem; }
+.empty h3 { font-family: 'Playfair Display', serif; color: var(--earth); margin-bottom: 0.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <h1>Discover NGOs</h1>
+  <p>Browse verified organizations working across education, healthcare, environment and more.</p>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <form method="get" style="display:flex;gap:1rem;flex:1;flex-wrap:wrap;align-items:center;">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="search" placeholder="Search NGOs..." value="{{ search }}">
+      </div>
+      <div class="cat-filter">
+        <a href="?{% if search %}search={{ search }}{% endif %}" class="cat-btn {% if not selected_cat %}active{% endif %}">All</a>
+        {% for val, label in categories %}
+          <a href="?category={{ val }}{% if search %}&search={{ search }}{% endif %}" class="cat-btn {% if selected_cat == val %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary" style="padding:0.5rem 1.25rem;">Search</button>
+    </form>
+  </div>
+</div>
+
+{% if ngos %}
+<div class="ngo-grid">
+  {% for ngo in ngos %}
+  <div class="card">
+    <div class="ngo-card-inner">
+      <div class="ngo-avatar-lg" style="background:linear-gradient(135deg,{% cycle 'var(--earth)' 'var(--sage)' 'var(--saffron)' %},var(--mint))">{{ ngo.logo_initial }}</div>
+      <h3>{{ ngo.name }}</h3>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <span class="badge badge-green">{{ ngo.get_category_display }}</span>
+        {% if ngo.verified %}<span class="badge badge-gold">✓ Verified</span>{% endif %}
+      </div>
+      <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.75rem;">📍 {{ ngo.location }}</div>
+      <p>{{ ngo.description|truncatechars:120 }}</p>
+      <div class="ngo-card-stats">
+        <div class="ngo-stat"><div class="v">₹{{ ngo.total_received|floatformat:0 }}</div><div class="l">Raised</div></div>
+        <div class="ngo-stat"><div class="v">{{ ngo.donor_count }}</div><div class="l">Donors</div></div>
+        <div class="ngo-stat"><div class="v">{{ ngo.founded_year }}</div><div class="l">Since</div></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <a href="{% url 'ngo_detail' ngo.id %}" class="btn btn-outline" style="flex:1;justify-content:center;">View</a>
+        <a href="{% url 'donate_to' ngo.id %}" class="btn btn-saffron" style="flex:1;justify-content:center;">Donate</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="emoji">🌱</div>
+  <h3>No NGOs found</h3>
+  <p>Try a different search or browse all categories.</p>
+  <a href="{% url 'ngo_list' %}" class="btn btn-outline" style="margin-top:1.5rem;">Clear Filters</a>
+</div>
+{% endif %}
+{% endblock %}
