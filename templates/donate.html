@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Donate — Daan{% endblock %}
+{% block extra_css %}
+<style>
+.donate-page { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 68px); }
+.donate-left { background: linear-gradient(160deg, var(--earth), var(--sage)); padding: 5rem 3rem; display: flex; flex-direction: column; justify-content: center; }
+.donate-left h1 { font-family: 'Playfair Display', serif; font-size: 3rem; color: white; margin-bottom: 1.5rem; line-height: 1.15; }
+.donate-left h1 em { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold); }
+.donate-left p { color: rgba(255,255,255,0.75); line-height: 1.8; margin-bottom: 2rem; font-size: 1.05rem; }
+.trust-items { display: flex; flex-direction: column; gap: 0.75rem; }
+.trust-item { display: flex; align-items: center; gap: 0.75rem; color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+.trust-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+
+.donate-right { background: var(--cream); padding: 5rem 3rem; display: flex; align-items: center; justify-content: center; }
+.donate-form-wrap { width: 100%; max-width: 480px; }
+.donate-form-wrap h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--earth); margin-bottom: 2rem; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; letter-spacing: 0.3px; }
+.form-group select, .form-group input, .form-group textarea {
+  width: 100%; padding: 0.85rem 1rem;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  background: white; color: var(--text);
+  transition: border 0.2s; outline: none;
+}
+.form-group select:focus, .form-group input:focus, .form-group textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(74,124,89,0.1); }
+
+.amount-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.pill { padding: 0.4rem 1rem; border: 1.5px solid var(--border); border-radius: 50px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; background: white; user-select:none; }
+.pill:hover, .pill.active { background: var(--earth); color: white; border-color: var(--earth); }
+
+.type-toggle { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.type-btn { flex: 1; padding: 0.65rem; border: 1.5px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; background: white; }
+.type-btn.active { background: var(--earth); color: white; border-color: var(--earth); }
+
+.anon-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.88rem; color: var(--text-light); }
+.anon-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--sage); }
+
+.login-nudge { background: rgba(232,137,43,0.1); border: 1px solid rgba(232,137,43,0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.88rem; color: var(--saffron); }
+.login-nudge a { color: var(--earth); font-weight: 600; }
+
+.next-btn {
+  width: 100%; padding: 1rem; border: none; border-radius: 50px;
+  background: linear-gradient(135deg, var(--saffron), #d4791f);
+  color: white; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  transition: all 0.25s;
+}
+.next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,137,43,0.35); }
+
+@media (max-width:768px) {
+  .donate-page { grid-template-columns: 1fr; }
+  .donate-left { padding: 3rem 1.5rem; }
+  .donate-right { padding: 2.5rem 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="donate-page">
+  <div class="donate-left fade-up">
+    <div class="section-tag" style="color:var(--gold)">Make a Difference</div>
+    <h1>Your gift changes <em>lives</em> today.</h1>
+    <p>100% of your donation goes directly to the NGO. We never take a platform fee. Every rupee is accounted for.</p>
+    <div class="trust-items">
+      <div class="trust-item"><div class="trust-icon">🔒</div>Secure checkout · 256-bit SSL</div>
+      <div class="trust-item"><div class="trust-icon">📊</div>Utilization reports from every NGO</div>
+      <div class="trust-item"><div class="trust-icon">🏛️</div>All NGOs verified by admin</div>
+      <div class="trust-item"><div class="trust-icon">🎯</div>Donate to specific needs or general fund</div>
+    </div>
+  </div>
+
+  <div class="donate-right">
+    <div class="donate-form-wrap fade-up" style="animation-delay:0.1s">
+      <h2>Make a Donation</h2>
+
+      {% if not user.is_authenticated %}
+      <div class="login-nudge">
+        Please <a href="{% url 'login' %}?next={% url 'donate' %}">login</a> or
+        <a href="{% url 'register' %}">create a free account</a> to donate.
+      </div>
+      {% endif %}
+
+      <form method="post" id="donateForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Select NGO</label>
+          <select name="ngo_id" required id="ngoSelect">
+            <option value="">Choose an organization…</option>
+            {% for ngo in ngos %}
+            <option value="{{ ngo.id }}" {% if selected_ngo.id == ngo.id %}selected{% endif %}>
+              {{ ngo.name }} — {{ ngo.get_category_display }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Donation Type</label>
+          <div class="type-toggle">
+            <div class="type-btn active" onclick="setType('monetary',this)">💰 Monetary</div>
+            <div class="type-btn" onclick="setType('material',this)">📦 Material</div>
+          </div>
+          <input type="hidden" name="donation_type" id="dtype" value="monetary">
+        </div>
+
+        <div id="monetary-section">
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <div class="amount-pills">
+                <div class="pill" onclick="setAmt(500,this)">₹500</div>
+              <div class="pill" onclick="setAmt(1000,this)">₹1,000</div>
+              <div class="pill" onclick="setAmt(2500,this)">₹2,500</div>
+              <div class="pill" onclick="setAmt(5000,this)">₹5,000</div>
+              <div class="pill" onclick="setAmt(10000,this)">₹10,000</div>
+            </div>
+            <input type="number" name="amount" id="amount-input" placeholder="Or enter custom amount" min="1" step="1">
+          </div>
+        </div>
+
+        <div id="material-section" style="display:none;">
+          <div class="form-group">
+            <label>Describe Items</label>
+            <textarea name="material_description" rows="3" placeholder="e.g. 50 notebooks, 2 bags of rice…"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Message (optional)</label>
+          <textarea name="message" rows="2" placeholder="A kind word for the NGO…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="anon-row">
+            <input type="checkbox" name="anonymous"> Donate anonymously
+          </label>
+        </div>
+
+        <button type="submit" class="next-btn">
+          Continue to Secure Checkout →
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setType(type, el) {
+  document.getElementById('dtype').value = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('monetary-section').style.display = type === 'monetary' ? '' : 'none';
+  document.getElementById('material-section').style.display = type === 'material' ? '' : 'none';
+  if (type === 'material') {
+    document.getElementById('amount-input').value = '0';
+  }
+}
+
+function setAmt(amt, el) {
+  document.getElementById('amount-input').value = amt;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Validate before submit
+document.getElementById('donateForm').addEventListener('submit', function(e) {
+  const ngo = document.getElementById('ngoSelect').value;
+  const dtype = document.getElementById('dtype').value;
+  const amount = document.getElementById('amount-input').value;
+
+  if (!ngo) { e.preventDefault(); alert('Please select an NGO.'); return; }
+  if (dtype === 'monetary' && (!amount || parseFloat(amount) < 1)) {
+    e.preventDefault(); alert('Please enter a valid donation amount (minimum ₹1).'); return;
+  }
+});
+</script>
+{% endblock %}

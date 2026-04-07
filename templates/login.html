@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Login — Daan{% endblock %}
+{% block extra_css %}
+<style>
+.auth-page { min-height: calc(100vh - 68px); display: flex; align-items: center; justify-content: center; padding: 4rem 2rem; }
+.auth-card { background: white; border-radius: 24px; border: 1px solid var(--border); padding: 3rem; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); }
+.auth-card h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--earth); margin-bottom: 0.5rem; }
+.auth-card p { color: var(--text-light); margin-bottom: 2rem; font-size: 0.9rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
+.form-group input { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+.form-group input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(74,124,89,0.08); }
+.auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-light); }
+.auth-footer a { color: var(--sage); text-decoration: none; font-weight: 500; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card fade-up">
+    <h1>Welcome back 🙏</h1>
+    <p>Login to access your donation dashboard.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group"><label>Username</label><input type="text" name="username" required autofocus></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.9rem;">Login</button>
+    </form>
+    <div class="auth-footer">New here? <a href="{% url 'register' %}">Create a free account</a></div>
+  </div>
+</div>
+{% endblock %}

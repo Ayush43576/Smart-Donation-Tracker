@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard — Daan{% endblock %}
+{% block extra_css %}
+<style>
+.dash-hero { background: linear-gradient(135deg, var(--earth), var(--sage)); color: white; padding: 4rem 2rem 3rem; }
+.dash-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
+.dash-hero p { color: rgba(255,255,255,0.7); }
+.dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1000px; margin: 3rem auto 0; padding: 0 2rem; }
+.dash-stat { background: white; border-radius: 16px; padding: 1.5rem; text-align: center; border: 1px solid var(--border); }
+.dash-stat .val { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--earth); }
+.dash-stat .lbl { font-size: 0.82rem; color: var(--text-light); margin-top: 0.25rem; }
+.dash-body { max-width: 1000px; margin: 3rem auto; padding: 0 2rem; }
+.dash-section { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; }
+.dash-section h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--earth); margin-bottom: 1.5rem; }
+.donation-row { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 1.5rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+.donation-row:last-child { border-bottom: none; }
+.donation-row .ngo-name { font-weight: 500; color: var(--earth); }
+.donation-row .txn { font-size: 0.78rem; color: var(--text-light); font-family: monospace; margin-top: 0.25rem; }
+.donation-row .amount { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--sage); font-size: 1.1rem; }
+.donation-row .date { font-size: 0.82rem; color: var(--text-light); }
+.empty-state { text-align: center; padding: 3rem; color: var(--text-light); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-hero">
+  <div style="max-width:1000px;margin:0 auto;padding:0 2rem;">
+    <h1>Welcome back, {{ user.username }} 🙏</h1>
+    <p>Your giving history and impact at a glance.</p>
+  </div>
+</div>
+
+<div class="dash-stats">
+  <div class="dash-stat">
+    <div class="val">₹{{ total|floatformat:0 }}</div>
+    <div class="lbl">Total Donated</div>
+  </div>
+  <div class="dash-stat">
+    <div class="val">{{ donations.count }}</div>
+    <div class="lbl">Donations Made</div>
+  </div>
+  <div class="dash-stat">
+    <div class="val">{{ ngos_supported }}</div>
+    <div class="lbl">NGOs Supported</div>
+  </div>
+</div>
+
+<div class="dash-body">
+  <div class="dash-section">
+    <h2>Donation History</h2>
+    {% if donations %}
+      {% for d in donations %}
+      <div class="donation-row">
+        <div>
+          <div class="ngo-name">{{ d.ngo.name }}</div>
+          <div class="txn">TXN: {{ d.transaction_id }}</div>
+        </div>
+        <span class="badge {% if d.status == 'completed' %}badge-green{% else %}badge-saffron{% endif %}">{{ d.status }}</span>
+        <div class="amount">{% if d.donation_type == 'monetary' %}₹{{ d.amount|floatformat:0 }}{% else %}Material{% endif %}</div>
+        <div class="date">{{ d.created_at|date:"d M Y" }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">🌱</div>
+        <p>You haven't made any donations yet.</p>
+        <a href="{% url 'donate' %}" class="btn btn-saffron" style="margin-top:1.25rem;">Make Your First Donation</a>
+      </div>
+    {% endif %}
+  </div>
+  <div style="text-align:center;">
+    <a href="{% url 'donate' %}" class="btn btn-primary">Donate Again →</a>
+  </div>
+</div>
+{% endblock %}
