@@ -108,9 +108,9 @@
 /* ── RIGHT PANEL (FORM) ── */
 .checkout-right {
   background: white;
-  padding: 4rem 3rem;
-  display: flex; flex-direction: column; justify-content: center;
-  box-shadow: -8px 0 40px rgba(0,0,0,0.06);
+  padding: 2rem;
+  display: block;              /* 🔥 CHANGE THIS */
+  height: 100vh;               /* 🔥 ADD THIS */
   overflow-y: auto;
 }
 .form-header { margin-bottom: 2.5rem; }
@@ -377,22 +377,29 @@
 
       <!-- NET BANKING TAB -->
       <div id="tab-netbanking" style="display:none;">
-        <div class="fg">
-          <label>Select Your Bank</label>
-          <input type="text" name="bank" placeholder="Search bank name...">
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:0.5rem;">
-          {% for bank in "SBI,HDFC,ICICI,Axis,Kotak,PNB"|split:"," %}
-          <div style="border:1.5px solid var(--border);border-radius:10px;padding:0.75rem;text-align:center;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s;" onclick="this.style.borderColor='var(--sage)';this.style.background='rgba(74,124,89,0.06)'">{{ bank }}</div>
-          {% endfor %}
-        </div>
+  <div class="fg">
+    <label>Select Your Bank</label>
+    <input type="text" name="bank" placeholder="Search bank name...">
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:0.5rem;">
+    {% for bank in banks %}
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:0.75rem;text-align:center;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s;"
+           onclick="this.style.borderColor='var(--sage)';this.style.background='rgba(74,124,89,0.06)'">
+        {{ bank }}
       </div>
+    {% endfor %}
+  </div>
+</div>  <!-- ✅ THIS WAS MISSING -->
 
       <button type="submit" class="pay-btn" id="payBtn">
-        <span id="payBtnText">
-          🔒 Confirm Donation{% if pending.donation_type == 'monetary' %} · ₹{{ pending.amount }}{% endif %}
-        </span>
-      </button>
+            <span id="payBtnText">
+             🔒 Confirm Donation
+       {% if pending.donation_type == 'monetary' %}
+         · ₹{{ pending.amount }}
+           {% endif %}
+          </span>
+          </button>
 
     </form>
 
